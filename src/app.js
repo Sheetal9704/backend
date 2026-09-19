@@ -2,33 +2,23 @@ const express = require("express");
 
 const app = express();
 
-app.use(
-  "/user",
-  (req, res, next) => {
-    console.log("Handling route 1");
-    // res.send("Route Handler 1");
+app.use("/admin", (req, res, next) => {
+  const token = "abc";
+  const isAdminAuthorized = token === "abc";
+  if (!isAdminAuthorized) {
+    res.status(401).send("unAuthorised Admin");
+  } else {
     next();
-  },
-  (req, res, next) => {
-    console.log("Handling route 2");
-    // res.send("Route Handler 2");
-    next();
-  },
-  (req, res, next) => {
-    console.log("Handling route 3");
-    // res.send("Route Handler 3");
-    next();
-  },
-  (req, res, next) => {
-    console.log("Handling route 4");
-    // res.send("Route Handler 4");
-    next();
-  },
-  (req, res, next) => {
-    console.log("Handling route 5");
-    res.send("Route Handler 5");
-  },
-);
+  }
+});
+
+app.get("/admin/getAllData", (req, res) => {
+  res.send("All Data sent");
+});
+
+app.get("/admin/deleteData", (req, res) => {
+  res.send("Delete Data");
+});
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
