@@ -2,41 +2,33 @@ const express = require("express");
 
 const app = express();
 
-/** 
-
-+ → one or more
-
-* → zero or more
-
-? → zero or one 
-**/
-
-// Matches /abc, /abbbc, etc.
-app.get(/^\/ab+c$/, (req, res) => {
-  res.send("demo testing");
-});
-
-app.get("/user/:userID", (req, res) => {
-  console.log(req.params.userID);
-  res.send("Request Params", req.params);
-});
-
-app.get("/user", (req, res) => {
-  console.log(req.query);
-  res.send("Request Query", req.query);
-});
-
-app.get("/user", (req, res) => {
-  res.send({
-    firstName: "Sheetal",
-    lastName: "M",
-    city: "Bengaluru",
-  });
-});
-
-app.post("/user", (req, res) => {
-  res.send("User data added successfully!!");
-});
+app.use(
+  "/user",
+  (req, res, next) => {
+    console.log("Handling route 1");
+    // res.send("Route Handler 1");
+    next();
+  },
+  (req, res, next) => {
+    console.log("Handling route 2");
+    // res.send("Route Handler 2");
+    next();
+  },
+  (req, res, next) => {
+    console.log("Handling route 3");
+    // res.send("Route Handler 3");
+    next();
+  },
+  (req, res, next) => {
+    console.log("Handling route 4");
+    // res.send("Route Handler 4");
+    next();
+  },
+  (req, res, next) => {
+    console.log("Handling route 5");
+    res.send("Route Handler 5");
+  },
+);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
