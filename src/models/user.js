@@ -24,7 +24,7 @@ const userSchema = new Schema(
       lowercase: true,
       validate: {
         validator: (value) => validator.isEmail(value),
-        message: (props) => `Incorrect Email Address: ${props.value}`,
+        message: "Incorrect Email Address",
       },
     },
     password: {

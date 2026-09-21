@@ -1,86 +1,62 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
-const userValidation = require("./validations/user");
+const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const userAuth = require("./middlewares/auth");
 
 const app = express();
 
-app.use(express.json()); // middleware to convert JSON readable data to JS object
-
-app.get("/userById", async (req, res) => {
-  try {
-    const user = await User.findOne({ _id: req.body._id });
-    // const user = await User.findById(req.body._id);
-    if (!user) {
-      res.status(404).send("User not found");
-    }
-    res.send(user);
-  } catch (err) {
-    res.status(400).send("Fetching Data Failed:" + err.message);
-  }
-});
-
-app.get("/user", async (req, res) => {
-  try {
-    const user = await User.findOne({ emailId: req.body.emailId });
-    if (!user) {
-      res.status(404).send("User not found");
-    }
-    res.send(user);
-  } catch (err) {
-    res.status(400).send("Fetching Data Failed:" + err.message);
-  }
-});
-
-app.patch("/userById/:userId", async (req, res) => {
-  try {
-    userValidation(req.body);
-    const userId = req.params.userId;
-    const user = await User.findByIdAndUpdate(userId, req.body, {
-      runValidators: true,
-    });
-    if (user) {
-      res.send("User updated successfully!!");
-    }
-  } catch (err) {
-    res.status(400).send("Update Failed:" + err.message);
-  }
-});
-
-app.patch("/user/:emailId", async (req, res) => {
-  try {
-    const user = await User.findOneAndUpdate(
-      { emailId: req.params.emailId },
-      req.body,
-      {
-        runValidators: true,
-      },
-    );
-    if (user) {
-      res.send("User updated successfully!!");
-    }
-  } catch (err) {
-    res.status(400).send("Update Failed:" + err.message);
-  }
-});
-
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.send(users);
-  } catch (err) {
-    res.status(400).send("Fetching data Failed:" + err.message);
-  }
-});
+app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
-
   try {
+    const { firstName, lastName, emailId, password } = req.body;
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
     await user.save();
     res.send("User data saved successfully!!");
   } catch (err) {
-    res.status(400).send("Saving Data Failed:" + err.message);
+    res.status(400).send("ERROR:" + err.message);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+
+    const user = await User.findOne({ emailId });
+    if (!user) {
+      throw new Error("User not Found!!");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new Error("Invalid Credentials");
+    } else {
+      const token = jwt.sign({ _id: user._id }, "Dev@Tinder123!!$");
+      res.cookie("token", token);
+      res.send("Login successfull!!");
+    }
+  } catch (err) {
+    res.status(400).send("ERROR:" + err.message);
+  }
+});
+
+app.get("/profile", userAuth, (req, res) => {
+  try {
+    res.send(req.user.firstName + " profile");
+  } catch (err) {
+    res.status(400).send("ERROR:" + err.message);
   }
 });
 
