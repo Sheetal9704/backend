@@ -38,12 +38,12 @@ app.post("/login", async (req, res) => {
       throw new Error("User not Found!!");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.validatePassword(password);
 
     if (!isPasswordValid) {
       throw new Error("Invalid Credentials");
     } else {
-      const token = jwt.sign({ _id: user._id }, "Dev@Tinder123!!$");
+      const token = await user.getJWT();
       res.cookie("token", token);
       res.send("Login successfull!!");
     }
