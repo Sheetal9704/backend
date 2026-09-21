@@ -1,4 +1,5 @@
 const { mongoose } = require("mongoose");
+const validator = require("validator");
 
 const Schema = mongoose.Schema;
 
@@ -21,10 +22,18 @@ const userSchema = new Schema(
       unique: true,
       trim: true,
       lowercase: true,
+      validate: {
+        validator: (value) => validator.isEmail(value),
+        message: (props) => `Incorrect Email Address: ${props.value}`,
+      },
     },
     password: {
       type: String,
       required: true,
+      validate: {
+        validator: (value) => validator.isStrongPassword(value),
+        message: "Please enter a strong Password.",
+      },
     },
     gender: {
       type: String,
@@ -36,9 +45,17 @@ const userSchema = new Schema(
     photoURL: {
       type: String,
       default: "https://www.svgrepo.com/show/535711/user.svg",
+      validate: {
+        validator: (value) => validator.isURL(value),
+        message: (props) => `Invalid PhotoURL: ${props.value}`,
+      },
     },
     skills: {
       type: [String],
+      validate: {
+        validator: (arr) => arr.length <= 10,
+        message: "Skills should not be more than 10",
+      },
     },
   },
   { timestamps: true },

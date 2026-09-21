@@ -1,6 +1,7 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const userValidation = require("./validations/user");
 
 const app = express();
 
@@ -31,9 +32,10 @@ app.get("/user", async (req, res) => {
   }
 });
 
-app.patch("/userById", async (req, res) => {
+app.patch("/userById/:userId", async (req, res) => {
   try {
-    const userId = req.body._id;
+    userValidation(req.body);
+    const userId = req.params.userId;
     const user = await User.findByIdAndUpdate(userId, req.body, {
       runValidators: true,
     });
@@ -45,10 +47,10 @@ app.patch("/userById", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
+app.patch("/user/:emailId", async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
-      { emailId: req.body.emailId },
+      { emailId: req.params.emailId },
       req.body,
       {
         runValidators: true,
