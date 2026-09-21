@@ -8,14 +8,14 @@ app.use(express.json()); // middleware to convert JSON readable data to JS objec
 
 app.get("/userById", async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.body._id.$oid });
-    // const user = await User.findById(req.body._id.$oid);
+    const user = await User.findOne({ _id: req.body._id });
+    // const user = await User.findById(req.body._id);
     if (!user) {
       res.status(404).send("User not found");
     }
     res.send(user);
   } catch (err) {
-    res.status(400).send("Error while fetching the data", err);
+    res.status(400).send("Fetching Data Failed:" + err.message);
   }
 });
 
@@ -27,34 +27,38 @@ app.get("/user", async (req, res) => {
     }
     res.send(user);
   } catch (err) {
-    res.status(400).send("Error while fetching the data");
+    res.status(400).send("Fetching Data Failed:" + err.message);
   }
 });
 
 app.patch("/userById", async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.body._id.$oid, {
-      emailId: req.body.emailId,
+    const userId = req.body._id;
+    const user = await User.findByIdAndUpdate(userId, req.body, {
+      runValidators: true,
     });
     if (user) {
       res.send("User updated successfully!!");
     }
   } catch (err) {
-    res.status(400).send("Error while fetching the data");
+    res.status(400).send("Update Failed:" + err.message);
   }
 });
 
 app.patch("/user", async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
-      { firstName: "Sheetal" },
       { emailId: req.body.emailId },
+      req.body,
+      {
+        runValidators: true,
+      },
     );
     if (user) {
       res.send("User updated successfully!!");
     }
   } catch (err) {
-    res.status(400).send("Error while fetching the data");
+    res.status(400).send("Update Failed:" + err.message);
   }
 });
 
@@ -63,7 +67,7 @@ app.get("/feed", async (req, res) => {
     const users = await User.find({});
     res.send(users);
   } catch (err) {
-    res.status(400).send("Error while fetching the data");
+    res.status(400).send("Fetching data Failed:" + err.message);
   }
 });
 
@@ -74,7 +78,7 @@ app.post("/signup", async (req, res) => {
     await user.save();
     res.send("User data saved successfully!!");
   } catch (err) {
-    res.status(400).send("Error while saving the data");
+    res.status(400).send("Saving Data Failed:" + err.message);
   }
 });
 
