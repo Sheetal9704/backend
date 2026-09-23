@@ -70,9 +70,9 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const pageNo = parseInt(req.query.page) || 1;
-    const skip = (pageNo - 1) * limit;
     let limit = parseInt(req.query.limit) || 10;
     limit > 50 ? 50 : limit;
+    const skip = (pageNo - 1) * limit;
 
     const loggedInUser = req.user;
     const userRequestSent = await ConnectionRequest.find({
