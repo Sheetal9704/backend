@@ -26,17 +26,17 @@ authRouter.post("/login", async (req, res) => {
 
     const user = await User.findOne({ emailId });
     if (!user) {
-      throw new Error("User not Found!!");
+      return res.status(400).json({ message: "User not Found!!" });
     }
 
     const isPasswordValid = await user.validatePassword(password);
 
     if (!isPasswordValid) {
-      throw new Error("Invalid Credentials");
+      return res.status(400).json({ message: "Invalid Credentials" });
     } else {
       const token = await user.getJWT();
       res.cookie("token", token);
-      res.send("Login successfull!!");
+      res.send(user);
     }
   } catch (err) {
     res.status(400).send("ERROR:" + err.message);
@@ -44,8 +44,12 @@ authRouter.post("/login", async (req, res) => {
 });
 
 authRouter.get("/logout", (req, res) => {
-  res.clearCookie("token");
-  res.send("Log out successfull!");
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: true,
+  });
+  res.send({ message: "Logout successful" });
 });
 
 module.exports = authRouter;
