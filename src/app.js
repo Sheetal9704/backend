@@ -17,6 +17,10 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+// app.use((req, res, next) => {
+//   res.set("Cache-Control", "no-store"); // to disable caching
+//   next();
+// });
 
 app.use("/", authRouter);
 app.use("/", profileRouter);

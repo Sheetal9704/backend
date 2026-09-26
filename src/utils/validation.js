@@ -7,6 +7,7 @@ const validateEditProfileData = (user) => {
     "age",
     "gender",
     "photoURL",
+    "about",
     "skills",
   ];
   const isEditValidationAllowed = Object.keys(user).every((key) =>

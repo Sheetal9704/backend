@@ -79,22 +79,19 @@ requestRouter.post(
       // validate request Id is of loggedin user
       // status of the connection request is interested
 
-      const connectionRequest = await ConnectionRequest.findOne({
+      const data = await ConnectionRequest.findOne({
         _id: requestId,
         toUserId: loggedInUser._id,
         status: "interested",
       });
-      if (!connectionRequest) {
+      if (!data) {
         return res
           .status(404)
           .json({ message: "Connection Request Not Found!!" });
       }
-      connectionRequest.status = status;
-      connectionRequest.save();
-      return res.json({
-        message: `${loggedInUser.firstName} ${status} the request`,
-        data: connectionRequest,
-      });
+      data.status = status;
+      data.save();
+      return res.json({ data });
     } catch (err) {
       res.status(400).send("ERROR: " + err.message);
     }

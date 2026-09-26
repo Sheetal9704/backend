@@ -44,6 +44,10 @@ const userSchema = new Schema(
         message: "{VALUE} is not a valid gender",
       },
     },
+    about: {
+      type: String,
+      default: "This ia default about of the user.",
+    },
     photoURL: {
       type: String,
       default: "https://www.svgrepo.com/show/535711/user.svg",

@@ -5,30 +5,22 @@ const User = require("../models/user");
 
 const userRouter = express.Router();
 
-userRouter.get("/user/pendingRequests", userAuth, async (req, res) => {
+userRouter.get("/user/review/requests", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
-    const pendingConnectionRequests = await ConnectionRequest.find({
+    const data = await ConnectionRequest.find({
       toUserId: loggedInUser._id,
       status: "interested",
     }).populate({
       path: "fromUserId",
-      select: "firstName lastName age skills",
+      select: "firstName lastName age gender skills photoURL about",
     });
-    if (!pendingConnectionRequests) {
+    if (!data) {
       return res.status(404).json({
         message: "Pending Request not found!!",
       });
     }
-    if (pendingConnectionRequests.length === 0) {
-      return res.status(200).json({
-        message: "No Pending Requests!!",
-      });
-    }
-    return res.json({
-      message: "Penidng request",
-      pendingConnectionRequests,
-    });
+    return res.json({ data });
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
   }
@@ -43,25 +35,25 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
         { toUserId: loggedInUser._id, status: "accepted" },
       ],
     })
-      .populate({ path: "fromUserId", select: "firstName lastName age skills" })
-      .populate({ path: "toUserId", select: "firstName lastName age skills" });
+      .populate({
+        path: "fromUserId",
+        select: "firstName lastName age gender skills photoURL about",
+      })
+      .populate({
+        path: "toUserId",
+        select: "firstName lastName age gender skills photoURL about",
+      });
 
     if (!connections) {
       return res.status(404).send("Connection Not found");
     }
-    if (connections.length == 0) {
-      return res.status(200).send("No connection!!");
-    }
-    const data = connections.map((con) => {
+    const data = connections?.map((con) => {
       if (con.fromUserId.equals(loggedInUser._id)) {
         return con.toUserId;
       }
       return con.fromUserId;
     });
-    res.json({
-      message: `${loggedInUser.firstName} Connections`,
-      data,
-    });
+    res.json({ data });
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
   }
@@ -92,7 +84,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     const userFeeds = await User.find({
       _id: { $nin: connectedUsers },
     })
-      .select("firstName lastName age gender skills photoUrl")
+      .select("firstName lastName age gender skills photoURL about")
       .skip(skip)
       .limit(limit);
 
